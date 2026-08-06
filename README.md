@@ -109,6 +109,27 @@ terraform validate
 terraform fmt -check -recursive
 ```
 
+## Remote state
+
+State is held in S3 and configured in `backend.tf`:
+
+| Setting | Value |
+|---|---|
+| Bucket | `devops-project-terraform-remote-backend` |
+| Key | `shopfl/dev/terraform.tfstate` |
+| Bucket region | `ca-central-1` |
+| Locking | S3 native (`use_lockfile`), no DynamoDB table |
+
+The bucket lives in `ca-central-1` while the resources are created in `us-east-1` — the
+backend region is independent of the provider region. The bucket is versioned, so a corrupted
+or truncated state can be rolled back to a previous object version.
+
+The bucket is shared with unrelated projects, which is why the key is namespaced under
+`shopfl/`. Do not change the key without migrating state first (`terraform init -migrate-state`).
+
+`.terraform.lock.hcl` is committed deliberately so provider versions resolve identically
+for everyone working against this shared state.
+
 ## Outputs
 
 | Output | Description |
