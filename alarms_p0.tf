@@ -45,7 +45,7 @@ locals {
     }
   }
 
-  alarm_actions = [local.incident_topic_arn]
+  alarm_actions = var.alarm_notifications_enabled ? [local.incident_topic_arn] : []
 
   dlq_targets = {
     payment = {

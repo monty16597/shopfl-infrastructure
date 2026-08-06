@@ -27,7 +27,13 @@ variable "artifact_root" {
 variable "incident_topic_name" {
   description = "Name of the pre-existing SNS topic that receives CloudWatch alarm notifications."
   type        = string
-  default     = "Opsfabric-Incidents"
+  default     = "OpsFabric-Incidents"
+}
+
+variable "alarm_notifications_enabled" {
+  description = "When false, alarms still evaluate and change state but publish to no destination."
+  type        = bool
+  default     = false
 }
 
 variable "incident_topic_arn" {

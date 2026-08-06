@@ -44,7 +44,7 @@ module "p2_warn_rate" {
 resource "aws_cloudwatch_log_metric_filter" "catalog_email_pattern" {
   name           = "${local.service_names.catalog}-email-pattern"
   log_group_name = module.catalog_reserve.log_group_name
-  pattern        = "{ $.body = %[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}% }"
+  pattern        = "{ $.body = \"*@*.*\" }"
 
   metric_transformation {
     name          = "catalog_email_pattern_matches"

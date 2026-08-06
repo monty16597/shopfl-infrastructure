@@ -2,7 +2,8 @@ region        = "us-east-1"
 env           = "dev"
 artifact_root = ".."
 
-incident_topic_name = "Opsfabric-Incidents"
+incident_topic_name         = "OpsFabric-Incidents"
+alarm_notifications_enabled = false
 
 table_billing_mode  = "PAY_PER_REQUEST"
 orders_billing_mode = "PAY_PER_REQUEST"
