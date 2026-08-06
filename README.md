@@ -127,8 +127,8 @@ or truncated state can be rolled back to a previous object version.
 The bucket is shared with unrelated projects, which is why the key is namespaced under
 `shopfl/`. Do not change the key without migrating state first (`terraform init -migrate-state`).
 
-`.terraform.lock.hcl` is committed deliberately so provider versions resolve identically
-for everyone working against this shared state.
+`.terraform.lock.hcl` is committed so provider versions resolve identically for everyone
+working against this shared state.
 
 ## Outputs
 
