@@ -241,3 +241,29 @@ module "p0_table_throttles" {
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions
 }
+
+########################################
+# Payment queue backlog
+########################################
+
+module "p0_payment_queue_age" {
+  source = "./modules/alarms"
+
+  name        = "${local.name_prefix}-payment-${var.env}-p0-queue-age"
+  severity    = "P0"
+  service     = "payment"
+  env         = var.env
+  description = "service=payment queue=${aws_sqs_queue.payment_requests.name} dlq=${aws_sqs_queue.payment_requests_dlq.name}"
+
+  namespace   = "AWS/SQS"
+  metric_name = "ApproximateAgeOfOldestMessage"
+  dimensions  = { QueueName = aws_sqs_queue.payment_requests.name }
+
+  statistic          = "Maximum"
+  period             = var.alarm_period_s
+  evaluation_periods = 1
+  threshold          = var.payment_queue_age_p0_threshold_s
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+}

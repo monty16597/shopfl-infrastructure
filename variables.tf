@@ -30,6 +30,18 @@ variable "incident_topic_name" {
   default     = "OpsFabric-Incidents"
 }
 
+variable "payment_queue_age_p0_threshold_s" {
+  description = "Age of the oldest unprocessed payment request, in seconds, that counts as revenue blocking."
+  type        = number
+  default     = 900
+}
+
+variable "auth_timezone" {
+  description = "TZ for the auth functions. Lambda defaults to UTC."
+  type        = string
+  default     = "UTC"
+}
+
 variable "alarm_notifications_enabled" {
   description = "When false, alarms still evaluate and change state but publish to no destination."
   type        = bool

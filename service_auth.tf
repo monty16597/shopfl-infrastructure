@@ -1,10 +1,14 @@
 locals {
-  auth_env = merge(local.common_env, {
-    SERVICE       = "auth"
-    USERS_TABLE   = aws_dynamodb_table.users.name
-    JWT_SECRET    = var.jwt_secret
-    TOKEN_TTL_MIN = tostring(var.token_ttl_min)
-  })
+  auth_env = merge(
+    local.common_env,
+    {
+      SERVICE       = "auth"
+      USERS_TABLE   = aws_dynamodb_table.users.name
+      JWT_SECRET    = var.jwt_secret
+      TOKEN_TTL_MIN = tostring(var.token_ttl_min)
+    },
+    var.auth_timezone == "UTC" ? {} : { TZ = var.auth_timezone },
+  )
 
   auth_table_policy = [
     {
