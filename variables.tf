@@ -379,3 +379,9 @@ variable "event_delivery_delta_threshold" {
   type        = number
   default     = 5
 }
+
+variable "notify_alarm_names" {
+  description = "Restrict notifications to these alarm names. Empty means every alarm publishes."
+  type        = list(string)
+  default     = []
+}

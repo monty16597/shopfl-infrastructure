@@ -109,8 +109,11 @@ module "p0_lambda_errors" {
   evaluation_periods = 1
   threshold          = var.lambda_error_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -161,6 +164,10 @@ resource "aws_cloudwatch_metric_alarm" "p0_error_rate" {
     return_data = true
   }
 
+  actions_enabled = var.alarm_notifications_enabled && (
+    length(var.notify_alarm_names) == 0 || contains(var.notify_alarm_names, "${local.name_prefix}-${each.key}-${var.env}-p0-error-rate")
+  )
+
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions
 
@@ -194,8 +201,11 @@ module "p0_api_5xx" {
   evaluation_periods = 1
   threshold          = var.api_5xx_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -221,8 +231,11 @@ module "p0_dlq_depth" {
   evaluation_periods = 1
   threshold          = var.dlq_depth_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -248,8 +261,11 @@ module "p0_table_throttles" {
   evaluation_periods = 1
   threshold          = var.dynamodb_throttle_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -274,6 +290,9 @@ module "p0_payment_queue_age" {
   evaluation_periods = 1
   threshold          = var.payment_queue_age_p0_threshold_s
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }

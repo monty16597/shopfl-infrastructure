@@ -21,8 +21,11 @@ module "p1_lambda_throttles" {
   evaluation_periods = 1
   threshold          = var.lambda_throttle_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -49,8 +52,11 @@ module "p1_duration_p99" {
   evaluation_periods = 2
   threshold          = var.lambda_duration_p99_ms
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -76,8 +82,11 @@ module "p1_queue_age" {
   evaluation_periods = 1
   threshold          = var.queue_age_threshold_s
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 
@@ -103,8 +112,11 @@ module "p1_notification_dlq_depth" {
   evaluation_periods = 1
   threshold          = var.dlq_depth_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -154,6 +166,10 @@ resource "aws_cloudwatch_metric_alarm" "p1_error_rate" {
     label       = "error percentage"
     return_data = true
   }
+
+  actions_enabled = var.alarm_notifications_enabled && (
+    length(var.notify_alarm_names) == 0 || contains(var.notify_alarm_names, "${local.name_prefix}-${each.key}-${var.env}-p1-error-rate")
+  )
 
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions

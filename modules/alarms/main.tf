@@ -27,6 +27,10 @@ resource "aws_cloudwatch_metric_alarm" "this" {
   comparison_operator = var.comparison_operator
   treat_missing_data  = var.treat_missing_data
 
+  actions_enabled = var.notifications_enabled && (
+    length(var.notify_names) == 0 || contains(var.notify_names, var.name)
+  )
+
   alarm_actions = var.alarm_actions
   ok_actions    = var.ok_actions
 

@@ -98,3 +98,15 @@ variable "ok_actions" {
   description = "Actions invoked when the alarm returns to OK."
   type        = list(string)
 }
+
+variable "notifications_enabled" {
+  description = "Master switch for whether this alarm may publish at all."
+  type        = bool
+  default     = false
+}
+
+variable "notify_names" {
+  description = "When non-empty, only alarms named in this list publish. Empty means all of them do."
+  type        = list(string)
+  default     = []
+}

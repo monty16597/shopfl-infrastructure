@@ -33,8 +33,11 @@ module "p2_warn_rate" {
   evaluation_periods = 1
   threshold          = var.warn_rate_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -72,8 +75,11 @@ module "p2_email_pattern" {
   evaluation_periods = 1
   threshold          = var.email_pattern_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -122,6 +128,10 @@ resource "aws_cloudwatch_metric_alarm" "p2_event_delivery_delta" {
     return_data = true
   }
 
+  actions_enabled = var.alarm_notifications_enabled && (
+    length(var.notify_alarm_names) == 0 || contains(var.notify_alarm_names, "${local.name_prefix}-notification-${var.env}-p2-event-delivery-delta")
+  )
+
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions
 
@@ -154,8 +164,11 @@ module "p2_sweeper_failures" {
   evaluation_periods = 1
   threshold          = var.eventbridge_failure_threshold
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -181,8 +194,11 @@ module "p2_dlq_age" {
   evaluation_periods = 1
   threshold          = var.dlq_age_threshold_s
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 ########################################
@@ -211,8 +227,11 @@ module "p2_log_retention" {
   comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "missing"
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 module "p2_bucket_config" {
@@ -237,8 +256,11 @@ module "p2_bucket_config" {
   comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "missing"
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
 
 module "p2_cart_item_count" {
@@ -260,6 +282,9 @@ module "p2_cart_item_count" {
   threshold          = var.carts_item_count_threshold
   treat_missing_data = "missing"
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
+
 }
