@@ -3,7 +3,7 @@ env           = "dev"
 artifact_root = ".."
 
 incident_topic_name         = "OpsFabric-Incidents"
-alarm_notifications_enabled = false
+alarm_notifications_enabled = true
 
 table_billing_mode  = "PAY_PER_REQUEST"
 orders_billing_mode = "PAY_PER_REQUEST"
