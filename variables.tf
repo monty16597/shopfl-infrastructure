@@ -5,7 +5,7 @@
 variable "region" {
   description = "AWS region for every resource in this configuration."
   type        = string
-  default     = "us-east-1"
+  default     = "us-east-2"
 }
 
 variable "env" {

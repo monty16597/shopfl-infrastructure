@@ -1,5 +1,13 @@
+resource "random_id" "products_bucket" {
+  byte_length = 4
+}
+
 resource "aws_s3_bucket" "products" {
   bucket = local.products_bucket_name
+
+  # This environment is torn down and rebuilt routinely; product images are seed
+  # data that can always be regenerated.
+  force_destroy = true
 
   tags = {
     Name    = local.products_bucket_name

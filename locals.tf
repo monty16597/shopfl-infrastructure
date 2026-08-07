@@ -1,5 +1,8 @@
 locals {
-  incident_topic_arn = coalesce(var.incident_topic_arn, data.aws_sns_topic.incidents.arn)
+  incident_topic_arn = try(
+    coalesce(var.incident_topic_arn, data.aws_sns_topic.incidents[0].arn),
+    null,
+  )
 
   account_id = data.aws_caller_identity.current.account_id
   region     = data.aws_region.current.name
@@ -44,8 +47,10 @@ locals {
   }
 
   order_events_topic_name = "${local.name_prefix}-order-events-${local.suffix}"
-  products_bucket_name    = "${local.name_prefix}-products-${local.suffix}-${local.account_id}"
-  cart_sweeper_rule_name  = "${local.name_prefix}-cart-sweeper-${local.suffix}"
+  # S3 names are globally unique, so the name carries a random suffix held in
+  # state rather than the account id.
+  products_bucket_name   = "${local.name_prefix}-products-${local.suffix}-${random_id.products_bucket.hex}"
+  cart_sweeper_rule_name = "${local.name_prefix}-cart-sweeper-${local.suffix}"
 
   metric_namespace     = "ShopFL"
   log_metric_namespace = "ShopFL/Logs"

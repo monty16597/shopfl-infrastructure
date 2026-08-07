@@ -45,7 +45,7 @@ locals {
     }
   }
 
-  alarm_actions = var.alarm_notifications_enabled ? [local.incident_topic_arn] : []
+  alarm_actions = var.alarm_notifications_enabled && local.incident_topic_arn != null ? [local.incident_topic_arn] : []
 
   # Payment failures stop money moving, so a payment DLQ is revenue blocking.
   # A notification DLQ degrades the experience without blocking an order, so it
