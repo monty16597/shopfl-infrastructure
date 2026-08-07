@@ -24,4 +24,4 @@ products_bucket_lifecycle_enabled = true
 cart_sweeper_enabled = true
 
 # Only these alarms publish. One scenario at a time.
-notify_alarm_names = ["shopfl-order-dev-p0-error-rate"]
+notify_alarm_names = ["shopfl-catalog-dev-p1-duration-p99"]

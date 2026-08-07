@@ -50,7 +50,7 @@ module "p1_duration_p99" {
   extended_statistic = "p99"
   period             = var.alarm_period_s
   evaluation_periods = 2
-  threshold          = var.lambda_duration_p99_ms
+  threshold          = lookup(var.duration_p99_overrides, each.key, var.lambda_duration_p99_ms)
 
   alarm_actions         = local.alarm_actions
   ok_actions            = local.alarm_actions

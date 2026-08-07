@@ -385,3 +385,14 @@ variable "notify_alarm_names" {
   type        = list(string)
   default     = []
 }
+
+variable "duration_p99_overrides" {
+  description = <<-EOT
+    Per-service p99 duration thresholds in milliseconds, overriding
+    lambda_duration_p99_ms. Calibrated from measurement rather than guessed:
+    catalog listing serves the seeded 60-product catalogue at a p99 of ~230ms,
+    so 800ms is comfortably degraded without being reachable by cold starts.
+  EOT
+  type        = map(number)
+  default     = { catalog = 800 }
+}
