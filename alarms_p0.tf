@@ -47,7 +47,17 @@ locals {
 
   alarm_actions = var.alarm_notifications_enabled ? [local.incident_topic_arn] : []
 
+  # Payment failures stop money moving, so a payment DLQ is revenue blocking.
+  # A notification DLQ degrades the experience without blocking an order, so it
+  # is alarmed at P1 in alarms_p1.tf.
   dlq_targets = {
+    payment = {
+      queue_name = aws_sqs_queue.payment_requests_dlq.name
+      source     = aws_sqs_queue.payment_requests.name
+    }
+  }
+
+  all_dlq_targets = {
     payment = {
       queue_name = aws_sqs_queue.payment_requests_dlq.name
       source     = aws_sqs_queue.payment_requests.name

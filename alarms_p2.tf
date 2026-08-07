@@ -131,3 +131,129 @@ resource "aws_cloudwatch_metric_alarm" "p2_event_delivery_delta" {
     Env      = var.env
   }
 }
+
+########################################
+# Scheduled rule failures
+########################################
+
+module "p2_sweeper_failures" {
+  source = "./modules/alarms"
+
+  name        = "${local.name_prefix}-cart-${var.env}-p2-sweeper-failures"
+  severity    = "P2"
+  service     = "cart"
+  env         = var.env
+  description = "service=cart rule=${local.cart_sweeper_rule_name} table=${local.table_names.carts}"
+
+  namespace   = "AWS/Events"
+  metric_name = "FailedInvocations"
+  dimensions  = { RuleName = local.cart_sweeper_rule_name }
+
+  statistic          = "Sum"
+  period             = var.alarm_period_s
+  evaluation_periods = 1
+  threshold          = var.eventbridge_failure_threshold
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+}
+
+########################################
+# Dead letter messages approaching retention expiry
+########################################
+
+module "p2_dlq_age" {
+  source   = "./modules/alarms"
+  for_each = local.all_dlq_targets
+
+  name        = "${local.name_prefix}-${each.key}-${var.env}-p2-dlq-age"
+  severity    = "P2"
+  service     = each.key
+  env         = var.env
+  description = "service=${each.key} queue=${each.value.queue_name} source_queue=${each.value.source}"
+
+  namespace   = "AWS/SQS"
+  metric_name = "ApproximateAgeOfOldestMessage"
+  dimensions  = { QueueName = each.value.queue_name }
+
+  statistic          = "Maximum"
+  period             = var.alarm_period_s
+  evaluation_periods = 1
+  threshold          = var.dlq_age_threshold_s
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+}
+
+########################################
+# Platform configuration hygiene
+########################################
+
+module "p2_log_retention" {
+  source = "./modules/alarms"
+
+  name        = "${local.name_prefix}-infra-${var.env}-p2-log-retention"
+  severity    = "P2"
+  service     = "infra"
+  env         = var.env
+  description = "service=infra check_function=${aws_lambda_function.config_check.function_name} log_group=${aws_cloudwatch_log_group.config_check.name}"
+
+  namespace   = "ShopFL/Config"
+  metric_name = "log_groups_without_retention"
+  dimensions  = { env = var.env }
+
+  statistic          = "Maximum"
+  period             = var.config_check_alarm_period_s
+  evaluation_periods = 1
+  threshold          = var.log_retention_threshold
+  treat_missing_data = "missing"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+}
+
+module "p2_bucket_config" {
+  source = "./modules/alarms"
+
+  name        = "${local.name_prefix}-infra-${var.env}-p2-bucket-config"
+  severity    = "P2"
+  service     = "infra"
+  env         = var.env
+  description = "service=infra bucket=${aws_s3_bucket.products.bucket} check_function=${aws_lambda_function.config_check.function_name}"
+
+  namespace   = "ShopFL/Config"
+  metric_name = "bucket_config_findings"
+  dimensions  = { env = var.env }
+
+  statistic          = "Maximum"
+  period             = var.config_check_alarm_period_s
+  evaluation_periods = 1
+  threshold          = var.bucket_config_threshold
+  treat_missing_data = "missing"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+}
+
+module "p2_cart_item_count" {
+  source = "./modules/alarms"
+
+  name        = "${local.name_prefix}-cart-${var.env}-p2-item-count"
+  severity    = "P2"
+  service     = "cart"
+  env         = var.env
+  description = "service=cart table=${local.table_names.carts} check_function=${aws_lambda_function.config_check.function_name}"
+
+  namespace   = "ShopFL/Config"
+  metric_name = "carts_item_count"
+  dimensions  = { env = var.env }
+
+  statistic          = "Maximum"
+  period             = var.config_check_alarm_period_s
+  evaluation_periods = 1
+  threshold          = var.carts_item_count_threshold
+  treat_missing_data = "missing"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+}

@@ -30,6 +30,48 @@ variable "incident_topic_name" {
   default     = "OpsFabric-Incidents"
 }
 
+variable "lambda_error_rate_p1_threshold" {
+  description = "Error percentage that counts as degraded. Sits below the paging threshold."
+  type        = number
+  default     = 1
+}
+
+variable "dlq_age_threshold_s" {
+  description = "Age of the oldest dead letter message, in seconds, worth reviewing before it expires."
+  type        = number
+  default     = 3600
+}
+
+variable "config_check_schedule" {
+  description = "How often the platform hygiene checker runs."
+  type        = string
+  default     = "rate(5 minutes)"
+}
+
+variable "config_check_alarm_period_s" {
+  description = "Evaluation period for hygiene alarms. Must exceed the check interval."
+  type        = number
+  default     = 600
+}
+
+variable "log_retention_threshold" {
+  description = "Number of log groups without a retention policy that is tolerated."
+  type        = number
+  default     = 0
+}
+
+variable "bucket_config_threshold" {
+  description = "Number of storage configuration findings that is tolerated."
+  type        = number
+  default     = 0
+}
+
+variable "carts_item_count_threshold" {
+  description = "Cart rows retained before the table is considered to be growing without bound."
+  type        = number
+  default     = 5000
+}
+
 variable "payment_queue_age_p0_threshold_s" {
   description = "Age of the oldest unprocessed payment request, in seconds, that counts as revenue blocking."
   type        = number

@@ -80,28 +80,87 @@ module "p1_queue_age" {
   ok_actions    = local.alarm_actions
 }
 
+
 ########################################
-# Scheduled rule failures
+# Notification dead letter queue depth
 ########################################
 
-module "p1_rule_failed_invocations" {
+module "p1_notification_dlq_depth" {
   source = "./modules/alarms"
 
-  name        = "${local.name_prefix}-cart-${var.env}-p1-rule-failed-invocations"
+  name        = "${local.name_prefix}-notification-${var.env}-p1-dlq-depth"
   severity    = "P1"
-  service     = "cart"
+  service     = "notification"
   env         = var.env
-  description = "service=cart rule=${local.cart_sweeper_rule_name} table=${local.table_names.carts}"
+  description = "service=notification queue=${aws_sqs_queue.notifications_dlq.name} source_queue=${aws_sqs_queue.notifications.name}"
 
-  namespace   = "AWS/Events"
-  metric_name = "FailedInvocations"
-  dimensions  = { RuleName = local.cart_sweeper_rule_name }
+  namespace   = "AWS/SQS"
+  metric_name = "ApproximateNumberOfMessagesVisible"
+  dimensions  = { QueueName = aws_sqs_queue.notifications_dlq.name }
 
-  statistic          = "Sum"
+  statistic          = "Maximum"
   period             = var.alarm_period_s
   evaluation_periods = 1
-  threshold          = var.eventbridge_failure_threshold
+  threshold          = var.dlq_depth_threshold
 
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions
+}
+
+########################################
+# Elevated error rate, below the paging threshold
+########################################
+
+resource "aws_cloudwatch_metric_alarm" "p1_error_rate" {
+  for_each = local.alarm_targets
+
+  alarm_name        = "${local.name_prefix}-${each.key}-${var.env}-p1-error-rate"
+  alarm_description = "service=${each.key} function=${each.value.function} log_group=${each.value.log_group}"
+
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  threshold           = var.lambda_error_rate_p1_threshold
+  treat_missing_data  = "notBreaching"
+
+  metric_query {
+    id          = "errors"
+    return_data = false
+
+    metric {
+      namespace   = "AWS/Lambda"
+      metric_name = "Errors"
+      dimensions  = { FunctionName = each.value.function }
+      period      = var.alarm_period_s
+      stat        = "Sum"
+    }
+  }
+
+  metric_query {
+    id          = "invocations"
+    return_data = false
+
+    metric {
+      namespace   = "AWS/Lambda"
+      metric_name = "Invocations"
+      dimensions  = { FunctionName = each.value.function }
+      period      = var.alarm_period_s
+      stat        = "Sum"
+    }
+  }
+
+  metric_query {
+    id          = "rate"
+    expression  = "100 * errors / IF(invocations > 0, invocations, 1)"
+    label       = "error percentage"
+    return_data = true
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = {
+    Severity = "P1"
+    Service  = each.key
+    Env      = var.env
+  }
 }

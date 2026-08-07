@@ -17,7 +17,7 @@ resource "aws_cloudwatch_event_target" "cart_sweeper" {
 
   rule      = aws_cloudwatch_event_rule.cart_sweeper[0].name
   target_id = "cart-sweeper"
-  arn       = module.cart_delete_cart.function_arn
+  arn       = module.cart_sweeper.function_arn
 
   input = jsonencode({
     source = "scheduled-sweep"
@@ -29,7 +29,7 @@ resource "aws_lambda_permission" "cart_sweeper" {
 
   statement_id  = "AllowInvokeFromEventBridge"
   action        = "lambda:InvokeFunction"
-  function_name = module.cart_delete_cart.function_name
+  function_name = module.cart_sweeper.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.cart_sweeper[0].arn
 }

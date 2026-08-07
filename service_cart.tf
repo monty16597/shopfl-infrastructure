@@ -131,3 +131,16 @@ resource "aws_lambda_permission" "cart" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.cart.execution_arn}/*/*"
 }
+
+module "cart_sweeper" {
+  source = "./modules/lambda_service"
+
+  name              = "${local.service_names.cart}-sweeper"
+  handler           = "handlers.sweep_carts.handler"
+  artifact_path     = local.artifacts.cart
+  env_vars          = local.cart_env
+  memory_mb         = var.default_memory_mb
+  timeout_s         = 60
+  policy_statements = local.cart_policy
+  tags              = { Service = "cart" }
+}
