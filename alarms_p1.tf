@@ -34,7 +34,7 @@ module "p1_lambda_throttles" {
 
 module "p1_duration_p99" {
   source   = "./modules/alarms"
-  for_each = local.alarm_targets
+  for_each = local.duration_targets
 
   name        = "${local.name_prefix}-${each.key}-${var.env}-p1-duration-p99"
   severity    = "P1"

@@ -45,6 +45,18 @@ locals {
     }
   }
 
+  # Latency is judged on the customer-facing read path. For catalog that is the
+  # product listing, not the reserve call order-service makes during checkout,
+  # so duration alarms use their own target map.
+  duration_targets = merge(local.alarm_targets, {
+    catalog = {
+      function  = module.catalog_list_products.function_name
+      log_group = module.catalog_list_products.log_group_name
+      api_id    = aws_apigatewayv2_api.catalog.id
+      api_name  = aws_apigatewayv2_api.catalog.name
+    }
+  })
+
   alarm_actions = var.alarm_notifications_enabled && local.incident_topic_arn != null ? [local.incident_topic_arn] : []
 
   # Payment failures stop money moving, so a payment DLQ is revenue blocking.
