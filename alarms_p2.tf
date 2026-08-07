@@ -206,7 +206,10 @@ module "p2_log_retention" {
   period             = var.config_check_alarm_period_s
   evaluation_periods = 1
   threshold          = var.log_retention_threshold
-  treat_missing_data = "missing"
+  # Strictly greater than: these thresholds are "how many findings are tolerated",
+  # so a >= comparison against 0 would alarm even when there is nothing to report.
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "missing"
 
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions
@@ -229,7 +232,10 @@ module "p2_bucket_config" {
   period             = var.config_check_alarm_period_s
   evaluation_periods = 1
   threshold          = var.bucket_config_threshold
-  treat_missing_data = "missing"
+  # Strictly greater than: these thresholds are "how many findings are tolerated",
+  # so a >= comparison against 0 would alarm even when there is nothing to report.
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "missing"
 
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions
