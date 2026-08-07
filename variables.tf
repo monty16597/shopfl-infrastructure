@@ -389,10 +389,13 @@ variable "notify_alarm_names" {
 variable "duration_p99_overrides" {
   description = <<-EOT
     Per-service p99 duration thresholds in milliseconds, overriding
-    lambda_duration_p99_ms. Calibrated from measurement rather than guessed:
-    catalog listing serves the seeded 60-product catalogue at a p99 of ~230ms,
-    so 800ms is comfortably degraded without being reachable by cold starts.
+    lambda_duration_p99_ms. Calibrated from measurement, and it has to separate
+    healthy from BOTH ways catalog listing degrades:
+      healthy, 512MB, paged query   ~185ms server p99
+      memory starved to 128MB       ~700ms
+      unbounded scan at 5k products ~1150ms
+    500ms sits above healthy with ~2.7x headroom and below both failure modes.
   EOT
   type        = map(number)
-  default     = { catalog = 800 }
+  default     = { catalog = 500 }
 }
