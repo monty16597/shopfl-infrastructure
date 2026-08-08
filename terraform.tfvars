@@ -17,6 +17,7 @@ payment_esm_enabled       = true
 
 gateway_secret_name = "shopfl-gateway-key-dev"
 gateway_latency_ms  = 120
+gateway_failure_rate = 0.0
 
 products_bucket_public_block      = true
 products_bucket_lifecycle_enabled = true
