@@ -11,14 +11,12 @@ locals {
     JWT_SECRET             = var.jwt_secret
   })
 
-  order_table_actions = concat(
-    [
-      "dynamodb:GetItem",
-      "dynamodb:Query",
-      "dynamodb:UpdateItem",
-    ],
-    var.order_role_allow_put_item ? ["dynamodb:PutItem"] : []
-  )
+  order_table_actions = [
+    "dynamodb:GetItem",
+    "dynamodb:PutItem",
+    "dynamodb:Query",
+    "dynamodb:UpdateItem",
+  ]
 
   order_policy = [
     {
