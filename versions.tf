@@ -1,6 +1,7 @@
 terraform {
-  # 1.10 is the floor for S3 native state locking (use_lockfile in backend.tf).
-  required_version = ">= 1.10"
+  # Lowered from 1.10 to support Terraform 1.9.x environments.
+  # Note: use_lockfile in backend.tf requires 1.10+; removed that setting.
+  required_version = ">= 1.6"
 
   required_providers {
     aws = {

@@ -20,7 +20,8 @@ locals {
 
   order_policy = [
     {
-      sid     = "OrdersTable"
+      sid    = "OrdersTable"
+      effect = "Allow"
       actions = local.order_table_actions
       resources = [
         aws_dynamodb_table.orders.arn,
@@ -28,7 +29,8 @@ locals {
       ]
     },
     {
-      sid = "IdempotencyTable"
+      sid    = "IdempotencyTable"
+      effect = "Allow"
       actions = [
         "dynamodb:GetItem",
         "dynamodb:PutItem",
@@ -37,7 +39,8 @@ locals {
       resources = [aws_dynamodb_table.idempotency.arn]
     },
     {
-      sid = "ProductLookup"
+      sid    = "ProductLookup"
+      effect = "Allow"
       actions = [
         "dynamodb:GetItem",
         "dynamodb:BatchGetItem",
@@ -46,11 +49,13 @@ locals {
     },
     {
       sid       = "PaymentQueue"
+      effect    = "Allow"
       actions   = ["sqs:SendMessage", "sqs:GetQueueAttributes"]
       resources = [aws_sqs_queue.payment_requests.arn]
     },
     {
       sid       = "OrderEvents"
+      effect    = "Allow"
       actions   = ["sns:Publish"]
       resources = [aws_sns_topic.order_events.arn]
     },
