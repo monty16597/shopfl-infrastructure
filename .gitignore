@@ -4,3 +4,6 @@
 *.auto.tfvars.json
 crash.log
 .DS_Store
+
+# graphify knowledge graph output
+graphify-out/
