@@ -210,7 +210,7 @@ variable "notification_esm_batch_size" {
 variable "gateway_secret_name" {
   description = "Secrets Manager secret name holding the payment gateway API key."
   type        = string
-  default     = "shopfl-gateway-key-dev"
+  default     = "shopfl-gateway-key-dev-v2"
 }
 
 variable "gateway_latency_ms" {
