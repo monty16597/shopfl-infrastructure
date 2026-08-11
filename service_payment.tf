@@ -6,7 +6,7 @@ locals {
     PAYMENT_QUEUE_URL      = aws_sqs_queue.payment_requests.url
     ORDER_EVENTS_TOPIC_ARN = aws_sns_topic.order_events.arn
     GATEWAY_BASE_URL       = aws_apigatewayv2_api.gateway.api_endpoint
-    GATEWAY_SECRET_NAME    = var.gateway_secret_name
+    GATEWAY_SECRET_NAME    = aws_secretsmanager_secret.gateway.name
   })
 
   payment_policy = [
@@ -57,7 +57,7 @@ locals {
     SERVICE              = "payment"
     GATEWAY_LATENCY_MS   = tostring(var.gateway_latency_ms)
     GATEWAY_FAILURE_RATE = tostring(var.gateway_failure_rate)
-    GATEWAY_SECRET_NAME  = var.gateway_secret_name
+    GATEWAY_SECRET_NAME  = aws_secretsmanager_secret.gateway.name
   })
 
   gateway_policy = [

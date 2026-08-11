@@ -15,7 +15,7 @@ cart_reserved_concurrency = -1
 order_role_allow_put_item = true
 payment_esm_enabled       = true
 
-gateway_secret_name = "shopfl-gateway-key-dev"
+gateway_secret_name = "shopfl-gateway-key-dev-v2"
 gateway_latency_ms  = 120
 
 products_bucket_public_block      = true
