@@ -3,7 +3,7 @@ env           = "dev"
 artifact_root = ".."
 
 incident_topic_name         = "OpsFabric-Incidents"
-alarm_notifications_enabled = false
+alarm_notifications_enabled = true
 
 table_billing_mode  = "PAY_PER_REQUEST"
 orders_billing_mode = "PAY_PER_REQUEST"
@@ -24,8 +24,4 @@ products_bucket_lifecycle_enabled = true
 cart_sweeper_enabled = true
 
 # Only these alarms publish. One scenario at a time.
-notify_alarm_names = []
-
-# rate(1 day) makes the sweeper untestable - FailedInvocations would not appear
-# for up to 24 hours. Two minutes keeps the scenario exercisable.
-cart_sweeper_schedule = "rate(1 day)"
+notify_alarm_names = ["shopfl-payment-dev-p0-error-rate"]
