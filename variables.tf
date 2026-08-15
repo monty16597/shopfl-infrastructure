@@ -399,3 +399,12 @@ variable "duration_p99_overrides" {
   type        = map(number)
   default     = { catalog = 500 }
 }
+
+variable "token_rejection_threshold" {
+  description = "Rejected tokens over one period that count as an auth outage."
+  type        = number
+  # Healthy traffic rejects a token only when one genuinely ages out, which at a 60-minute
+  # TOKEN_TTL_MIN never happens inside a run - measured baseline is 0. 20 in five minutes is
+  # comfortably above noise and is crossed within one period once every token is being rejected.
+  default = 20
+}

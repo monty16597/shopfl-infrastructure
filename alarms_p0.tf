@@ -264,8 +264,16 @@ module "p0_table_throttles" {
   env         = var.env
   description = "service=${each.key} table=${each.value}"
 
+  # WriteThrottleEvents, NOT ThrottledRequests.
+  #
+  # DynamoDB publishes ThrottledRequests only against the paired dimension set
+  # (TableName, Operation) — never against TableName on its own. An alarm keyed on TableName alone
+  # therefore matches no metric stream at all and sits in OK forever. Confirmed on a live throttled
+  # table: WriteThrottleEvents reported 56 in a single period while ThrottledRequests had no
+  # datapoints and this alarm stayed OK. WriteThrottleEvents is published against TableName alone,
+  # which is the dimension this alarm actually has.
   namespace   = "AWS/DynamoDB"
-  metric_name = "ThrottledRequests"
+  metric_name = "WriteThrottleEvents"
   dimensions  = { TableName = each.value }
 
   statistic          = "Sum"
@@ -307,4 +315,54 @@ module "p0_payment_queue_age" {
   notifications_enabled = var.alarm_notifications_enabled
   notify_names          = var.notify_alarm_names
 
+}
+
+########################################
+# Token rejection rate
+########################################
+
+# P0-APP-03 breaks the clock arithmetic in auth-service: login builds exp from datetime.now()
+# while verify compares against datetime.utcnow(), so under any non-UTC TZ every token is rejected
+# the instant it is issued. Nothing in the estate could see it. verify returns a clean 401 through
+# _unauthorized() and logs at INFO, so AWS/Lambda Errors stays flat; the p0-error-rate and
+# p0-errors alarms both watch shopfl-auth-dev-login, which succeeds - it mints the bad token
+# perfectly - and p0-api-5xx watches 5xx, while a 401 is 4xx. A total auth outage was invisible on
+# every existing signal. This filter is the missing one, and it matches the scenario's own stated
+# signal: the 401 rate on /auth/verify.
+resource "aws_cloudwatch_log_metric_filter" "auth_token_rejected" {
+  name           = "${local.service_names.auth}-token-rejected"
+  log_group_name = module.auth_verify.log_group_name
+  pattern        = "{ $.event = \"verify_rejected\" }"
+
+  metric_transformation {
+    name          = "auth_token_rejected"
+    namespace     = local.log_metric_namespace
+    value         = "1"
+    default_value = "0"
+    unit          = "Count"
+  }
+}
+
+module "p0_auth_token_rejection" {
+  source = "./modules/alarms"
+
+  name        = "${local.name_prefix}-auth-${var.env}-p0-token-rejection"
+  severity    = "P0"
+  service     = "auth"
+  env         = var.env
+  description = "service=auth log_group=${module.auth_verify.log_group_name} function=${module.auth_verify.function_name}"
+
+  namespace   = local.log_metric_namespace
+  metric_name = aws_cloudwatch_log_metric_filter.auth_token_rejected.metric_transformation[0].name
+
+  statistic          = "Sum"
+  period             = var.alarm_period_s
+  evaluation_periods = 1
+  threshold          = var.token_rejection_threshold
+  treat_missing_data = "notBreaching"
+
+  alarm_actions         = local.alarm_actions
+  ok_actions            = local.alarm_actions
+  notifications_enabled = var.alarm_notifications_enabled
+  notify_names          = var.notify_alarm_names
 }

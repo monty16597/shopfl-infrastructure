@@ -89,8 +89,19 @@ def check_bucket_config():
 
 def check_table_growth():
     """Report how many items the carts table is holding."""
-    described = dynamodb.describe_table(TableName=CARTS_TABLE)["Table"]
-    item_count = described.get("ItemCount", 0)
+    # Counted, not read off DescribeTable. DynamoDB refreshes Table.ItemCount roughly every six
+    # hours, so it lags real growth by far more than P2-INFRA-03's 60-minute budget - it read 0
+    # while the table genuinely held rows. A Select=COUNT scan is exact and current, and this
+    # table is small precisely because the scenario is about it NOT staying small.
+    item_count = 0
+    kwargs = {"TableName": CARTS_TABLE, "Select": "COUNT"}
+    while True:
+        page = dynamodb.scan(**kwargs)
+        item_count += page["Count"]
+        last_key = page.get("LastEvaluatedKey")
+        if not last_key:
+            break
+        kwargs["ExclusiveStartKey"] = last_key
 
     _log("table_growth_checked", table=CARTS_TABLE, item_count=item_count)
     _emit("carts_item_count", item_count)

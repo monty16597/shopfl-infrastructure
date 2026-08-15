@@ -50,9 +50,12 @@ resource "aws_iam_role_policy" "config_check" {
         Resource = aws_s3_bucket.products.arn
       },
       {
-        Sid      = "InspectTables"
-        Effect   = "Allow"
-        Action   = ["dynamodb:DescribeTable"]
+        Sid    = "InspectTables"
+        Effect = "Allow"
+        # Scan as well as DescribeTable: the growth check counts rows directly because
+        # DescribeTable.ItemCount is refreshed only every ~6 hours. Select=COUNT returns no
+        # attribute data, so this reads cart sizes, not cart contents.
+        Action   = ["dynamodb:DescribeTable", "dynamodb:Scan"]
         Resource = aws_dynamodb_table.carts.arn
       },
     ]

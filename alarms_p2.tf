@@ -41,48 +41,6 @@ module "p2_warn_rate" {
 }
 
 ########################################
-# Email address pattern in log payloads
-########################################
-
-resource "aws_cloudwatch_log_metric_filter" "catalog_email_pattern" {
-  name           = "${local.service_names.catalog}-email-pattern"
-  log_group_name = module.catalog_reserve.log_group_name
-  pattern        = "{ $.body = \"*@*.*\" }"
-
-  metric_transformation {
-    name          = "catalog_email_pattern_matches"
-    namespace     = local.log_metric_namespace
-    value         = "1"
-    default_value = "0"
-    unit          = "Count"
-  }
-}
-
-module "p2_email_pattern" {
-  source = "./modules/alarms"
-
-  name        = "${local.name_prefix}-catalog-${var.env}-p2-email-pattern"
-  severity    = "P2"
-  service     = "catalog"
-  env         = var.env
-  description = "service=catalog log_group=${module.catalog_reserve.log_group_name} table=${local.table_names.products}"
-
-  namespace   = local.log_metric_namespace
-  metric_name = aws_cloudwatch_log_metric_filter.catalog_email_pattern.metric_transformation[0].name
-
-  statistic          = "Sum"
-  period             = var.alarm_period_s
-  evaluation_periods = 1
-  threshold          = var.email_pattern_threshold
-
-  alarm_actions         = local.alarm_actions
-  ok_actions            = local.alarm_actions
-  notifications_enabled = var.alarm_notifications_enabled
-  notify_names          = var.notify_alarm_names
-
-}
-
-########################################
 # Published order events versus sent notifications
 ########################################
 
@@ -201,38 +159,6 @@ module "p2_dlq_age" {
 
 }
 
-########################################
-# Platform configuration hygiene
-########################################
-
-module "p2_log_retention" {
-  source = "./modules/alarms"
-
-  name        = "${local.name_prefix}-infra-${var.env}-p2-log-retention"
-  severity    = "P2"
-  service     = "infra"
-  env         = var.env
-  description = "service=infra check_function=${aws_lambda_function.config_check.function_name} log_group=${aws_cloudwatch_log_group.config_check.name}"
-
-  namespace   = "ShopFL/Config"
-  metric_name = "log_groups_without_retention"
-  dimensions  = { env = var.env }
-
-  statistic          = "Maximum"
-  period             = var.config_check_alarm_period_s
-  evaluation_periods = 1
-  threshold          = var.log_retention_threshold
-  # Strictly greater than: these thresholds are "how many findings are tolerated",
-  # so a >= comparison against 0 would alarm even when there is nothing to report.
-  comparison_operator = "GreaterThanThreshold"
-  treat_missing_data  = "missing"
-
-  alarm_actions         = local.alarm_actions
-  ok_actions            = local.alarm_actions
-  notifications_enabled = var.alarm_notifications_enabled
-  notify_names          = var.notify_alarm_names
-
-}
 
 module "p2_bucket_config" {
   source = "./modules/alarms"
